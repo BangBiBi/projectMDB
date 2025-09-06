@@ -11,3 +11,6 @@ coverage/
 docker-volumes/
 .vscode/settings.json
 *.tmp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
