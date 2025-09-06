@@ -83,3 +83,48 @@ BEGIN
     VALUES ('BULK_INSERT', record_count, TIMESTAMPDIFF(MICROSECOND, start_time, NOW()) / 1000);
 END$$
 DELIMITER ;
+
+-- 3. 변경사항 추적 테이블 (Audit Log)
+CREATE TABLE audit_logs (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    db_type VARCHAR(20) NOT NULL DEFAULT 'mysql',
+    table_name VARCHAR(50) NOT NULL,
+    record_id VARCHAR(100) NOT NULL,
+    operation_type ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL,
+    old_values JSON,
+    new_values JSON,
+    changed_fields TEXT,
+    change_source VARCHAR(50) DEFAULT 'API',
+    user_id VARCHAR(100),
+    session_id VARCHAR(100),
+    ip_address VARCHAR(45),
+    transaction_id VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_audit_table (table_name),
+    INDEX idx_audit_record (record_id),
+    INDEX idx_audit_operation (operation_type),
+    INDEX idx_audit_created_at (created_at)
+);
+
+-- 4. 데이터 무결성 검사 테이블
+CREATE TABLE data_integrity_checks (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    check_type VARCHAR(50) NOT NULL,
+    source_db VARCHAR(20) NOT NULL DEFAULT 'mysql',
+    target_db VARCHAR(20),
+    table_name VARCHAR(50) NOT NULL,
+    record_id VARCHAR(100),
+    check_query TEXT,
+    issue_found BOOLEAN DEFAULT FALSE,
+    issue_description TEXT,
+    data_before JSON,
+    data_after JSON,
+    severity_level ENUM('LOW', 'MEDIUM', 'HIGH', 'CRITICAL') DEFAULT 'MEDIUM',
+    status ENUM('PENDING', 'RESOLVED', 'IGNORED') DEFAULT 'PENDING',
+    checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL,
+    notes TEXT,
+    INDEX idx_integrity_db (source_db, target_db),
+    INDEX idx_integrity_type (check_type, status),
+    INDEX idx_integrity_checked_at (checked_at)
+);

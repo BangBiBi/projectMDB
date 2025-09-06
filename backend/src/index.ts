@@ -4,6 +4,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import { config } from 'dotenv';
+import { DatabaseConnections } from './config/database';
+import databaseRouter from './routes/database';
+import schemaRouter from './routes/schema';
 
 // Load environment variables
 config();
@@ -29,13 +32,17 @@ app.get('/health', (_req, res) => {
   });
 });
 
-// API routes will be added here
+// API routes
+app.use('/api/databases', databaseRouter);
+app.use('/api/schema', schemaRouter);
+
 app.use('/api', (_req, res) => {
   res.json({
     message: 'Multi-Database Management System API',
     endpoints: {
       health: '/health',
       databases: '/api/databases',
+      schema: '/api/schema',
       address: '/api/address',
       sync: '/api/sync',
       reports: '/api/reports'
@@ -60,10 +67,15 @@ app.use('*', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 MDB Backend server is running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Initialize database connections
+  const dbManager = DatabaseConnections.getInstance();
+  console.log('🔌 Initializing database connections...');
+  await dbManager.connectAll();
 });
 
 export default app;

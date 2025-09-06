@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 1. MySQL - 전통적인 관계형 DB (OLTP 최적화)
   mysql:
@@ -11,7 +9,7 @@ services:
       MYSQL_USER: mdb_user
       MYSQL_PASSWORD: mdb_password
     ports:
-      - "3306:3306"
+      - "3307:3306"  # 포트 변경하여 충돌 방지
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/schemas/mysql:/docker-entrypoint-initdb.d
@@ -28,7 +26,7 @@ services:
       POSTGRES_USER: mdb_user
       POSTGRES_PASSWORD: mdb_password
     ports:
-      - "5432:5432"
+      - "5433:5432"  # 포트 변경하여 충돌 방지
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/schemas/postgresql:/docker-entrypoint-initdb.d
@@ -45,7 +43,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: adminpassword
       MONGO_INITDB_DATABASE: postal_codes_db
     ports:
-      - "27017:27017"
+      - "27018:27017"  # 포트 변경하여 충돌 방지
     volumes:
       - mongo_data:/data/db
       - ./database/schemas/mongodb:/docker-entrypoint-initdb.d
@@ -62,8 +60,8 @@ services:
       ORACLE_USERNAME: mdb_user
       ORACLE_USER_PASSWORD: mdb_password
     ports:
-      - "1521:1521"
-      - "5500:5500"  # EM Express
+      - "1522:1521"  # 포트 변경하여 충돌 방지
+      - "5501:5500"  # EM Express 포트 변경
     volumes:
       - oracle_data:/opt/oracle/oradata
       - ./database/schemas/oracle:/docker-entrypoint-initdb.d
