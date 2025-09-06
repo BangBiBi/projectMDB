@@ -1,0 +1,32 @@
+{
+  "name": "mdb-test-suite",
+  "version": "1.0.0",
+  "description": "Test suite for Multi-Database Management System",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest unit/",
+    "test:integration": "jest integration/",
+    "test:performance": "jest performance/",
+    "test:ci": "jest --ci --coverage --watchAll=false"
+  },
+  "keywords": ["test", "jest", "database", "tdd"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "@types/jest": "^29.5.8",
+    "@types/supertest": "^2.0.16",
+    "ts-jest": "^29.1.1",
+    "nodemon": "^3.0.2"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "mysql2": "^3.6.5",
+    "pg": "^8.11.3",
+    "mongodb": "^6.3.0",
+    "redis": "^4.6.10"
+  }
+}
