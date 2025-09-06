@@ -25,11 +25,11 @@ projectMDB/
 │   └── package.json       # 의존성 관리
 ├── database/
 │   └── schemas/           # 각 DB별 스키마 파일
-│       ├── mysql/01_init_schema.sql
-│       ├── postgresql/01_init_schema.sql
-│       ├── mongodb/01_init_schema.js
-│       ├── oracle/01_init_schema.sql
-│       └── sqlite/01_init_schema.sql
+│       ├── mysql/init_schema.sql
+│       ├── postgresql/init_schema.sql
+│       ├── mongodb/init_schema.js
+│       ├── oracle/init_schema.sql
+│       └── sqlite/init_schema.sql
 ├── docker-compose.yml     # 5개 DB 컨테이너 오케스트레이션
 └── frontend/              # React + TypeScript (준비)
 ```
