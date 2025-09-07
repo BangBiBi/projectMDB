@@ -223,6 +223,75 @@
             background: rgba(255,255,255,0.3);
             transform: translateY(-2px);
         }
+
+        /* 전체 통계 박스 스타일 */
+        .stats-overview {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(255, 107, 107, 0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .stats-overview:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(255, 107, 107, 0.25);
+        }
+
+        .stats-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .stats-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .stats-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ffffff;
+            animation: pulse 2s infinite;
+        }
+
+        .stats-info {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .stat-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -241,6 +310,31 @@
         </div>
 
         <div class="dashboard" id="dashboard">
+            <!-- 전체 통계 박스 (첫 번째 카드) -->
+            <div class="stats-overview" id="statsOverview">
+                <div class="stats-header">
+                    <h3 class="stats-name">📊 전체 통계</h3>
+                    <div class="stats-icon"></div>
+                </div>
+                <div class="stats-info">
+                    모든 데이터베이스 통합 현황<br>
+                    실시간 성능 모니터링
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalRecords">0</div>
+                        <div class="stat-label">전체 레코드</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="activeDatabases">0/5</div>
+                        <div class="stat-label">활성 DB</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="avgQuerySpeed">--</div>
+                        <div class="stat-label">평균속도(ms)</div>
+                    </div>
+                </div>
+            </div>
             <div class="db-card">
                 <div class="db-header">
                     <h3 class="db-name">MySQL</h3>
@@ -429,6 +523,9 @@
                     // 전체 상태 업데이트
                     updateOverallStatus(successCount, totalCount, statsData);
                     
+                    // 전체 통계 박스 업데이트
+                    updateStatsOverview(successCount, totalCount, statsData);
+                    
                 } else {
                     throw new Error(`HTTP ${statsResponse.status}`);
                 }
@@ -438,6 +535,7 @@
                 
                 // 레코드 수 없이 기본 상태만 표시
                 updateOverallStatus(0, totalCount);
+                updateStatsOverview(0, totalCount);
             }
         }
 
@@ -476,6 +574,44 @@
             }
 
             // console.log(`📊 전체 상태: ${successCount}/${totalCount} 데이터베이스 연결됨${totalRecords > 0 ? `, 총 ${totalRecords.toLocaleString()}개 레코드` : ''}`);
+        }
+
+        // 전체 통계 박스 업데이트
+        function updateStatsOverview(successCount, totalCount, statsData = null) {
+            const totalRecordsElement = document.getElementById('totalRecords');
+            const activeDatabasesElement = document.getElementById('activeDatabases');
+            const avgQuerySpeedElement = document.getElementById('avgQuerySpeed');
+            
+            // 전체 레코드 수 계산
+            let totalRecords = 0;
+            if (statsData) {
+                totalRecords = Object.values(statsData)
+                    .filter(db => db.recordCount && db.recordCount > 0)
+                    .reduce((sum, db) => sum + db.recordCount, 0);
+            }
+            
+            // 전체 레코드 수 업데이트
+            if (totalRecords > 0) {
+                totalRecordsElement.textContent = totalRecords.toLocaleString();
+                totalRecordsElement.style.color = '#ffffff';
+            } else {
+                totalRecordsElement.textContent = '0';
+                totalRecordsElement.style.color = 'rgba(255,255,255,0.8)';
+            }
+            
+            // 활성 데이터베이스 수 업데이트
+            activeDatabasesElement.textContent = `${successCount}/${totalCount}`;
+            if (successCount === totalCount) {
+                activeDatabasesElement.style.color = '#ffffff';
+            } else if (successCount > 0) {
+                activeDatabasesElement.style.color = '#ffffff';
+            } else {
+                activeDatabasesElement.style.color = 'rgba(255,255,255,0.6)';
+            }
+            
+            // 평균 쿼리 속도 (나중에 구현 예정)
+            avgQuerySpeedElement.textContent = '--';
+            avgQuerySpeedElement.style.color = 'rgba(255,255,255,0.8)';
         }
 
         // 알림 표시 (선택사항)
