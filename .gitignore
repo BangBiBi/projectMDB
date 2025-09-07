@@ -56,3 +56,13 @@ Thumbs.db
 *.backup
 *.old
 *.orig
+
+# 불필요한 스키마 파일들
+database/schemas/cassandra/
+database/schemas/clickhouse/
+database/schemas/extended_schema.sql
+database/schemas/*/01_init_schema.*
+database/schemas/*/init.js
+database/schemas/*/init.cql
+database/schemas/oracle/init.sql
+database/schemas/sqlite/init.sql
