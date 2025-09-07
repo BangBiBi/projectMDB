@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>멀티 데이터베이스 관리 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .db-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .db-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .db-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .db-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.checking {
+            background: #ffa500;
+        }
+
+        .status-indicator.online {
+            background: #00c851;
+        }
+
+        .status-indicator.offline {
+            background: #ff4444;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .db-info {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .db-port {
+            display: inline-block;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+
+        .test-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .overall-status {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .status-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .status-message {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+        }
+
+        .refresh-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            margin: 20px auto;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">멀티 데이터베이스 관리 시스템</h1>
+            <p class="subtitle">Multi-Database Performance Comparison System</p>
+        </div>
+
+        <div class="overall-status" id="overallStatus">
+            <h2 class="status-title">시스템 초기화 중...</h2>
+            <p class="status-message">
+                <span class="loading"></span>
+                데이터베이스 연결 상태를 확인하고 있습니다.
+            </p>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+            <div class="db-card">
+                <div class="db-header">
+                    <h3 class="db-name">MySQL</h3>
+                    <div class="status-indicator checking" id="mysql-status"></div>
+                </div>
+                <div class="db-info">
+                    전통적인 관계형 데이터베이스<br>
+                    OLTP 최적화, 빠른 트랜잭션 처리
+                    <div class="db-port">포트: 3307</div>
+                </div>
+                <button class="test-button" onclick="testDatabase('mysql')">연결 테스트</button>
+            </div>
+
+            <div class="db-card">
+                <div class="db-header">
+                    <h3 class="db-name">PostgreSQL</h3>
+                    <div class="status-indicator checking" id="postgresql-status"></div>
+                </div>
+                <div class="db-info">
+                    고성능 관계형 데이터베이스<br>
+                    복잡한 쿼리 최적화, JSONB 지원
+                    <div class="db-port">포트: 5433</div>
+                </div>
+                <button class="test-button" onclick="testDatabase('postgresql')">연결 테스트</button>
+            </div>
+
+            <div class="db-card">
+                <div class="db-header">
+                    <h3 class="db-name">MongoDB</h3>
+                    <div class="status-indicator checking" id="mongodb-status"></div>
+                </div>
+                <div class="db-info">
+                    NoSQL 문서형 데이터베이스<br>
+                    스키마리스, 수평 확장성
+                    <div class="db-port">포트: 27018</div>
+                </div>
+                <button class="test-button" onclick="testDatabase('mongodb')">연결 테스트</button>
+            </div>
+
+            <div class="db-card">
+                <div class="db-header">
+                    <h3 class="db-name">Oracle</h3>
+                    <div class="status-indicator checking" id="oracle-status"></div>
+                </div>
+                <div class="db-info">
+                    엔터프라이즈급 관계형 데이터베이스<br>
+                    고급 최적화, CBO, 파티셔닝
+                    <div class="db-port">포트: 1522</div>
+                </div>
+                <button class="test-button" onclick="testDatabase('oracle')">연결 테스트</button>
+            </div>
+
+            <div class="db-card">
+                <div class="db-header">
+                    <h3 class="db-name">SQLite</h3>
+                    <div class="status-indicator checking" id="sqlite-status"></div>
+                </div>
+                <div class="db-info">
+                    경량 파일기반 데이터베이스<br>
+                    임베디드 최적화, 개발 편의성
+                    <div class="db-port">파일: postal_codes.db</div>
+                </div>
+                <button class="test-button" onclick="testDatabase('sqlite')">연결 테스트</button>
+            </div>
+        </div>
+
+        <button class="refresh-btn" onclick="checkAllDatabases()">🔄 전체 상태 새로고침</button>
+
+        <div class="footer">
+            <p>15주 연구 프로젝트 - 이질적인 데이터베이스 환경을 극복하는 대용량 데이터베이스 관리 시스템</p>
+            <p>© 2025 BangBiBi - 개발 2일차</p>
+        </div>
+    </div>
+
+    <script>
+        // API 기본 URL
+        const API_BASE = '/api/v1';
+
+        // 데이터베이스 목록
+        const databases = ['mysql', 'postgresql', 'mongodb', 'oracle', 'sqlite'];
+
+        // 페이지 로드시 자동 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 멀티 데이터베이스 시스템 대시보드 로드 완료');
+            setTimeout(checkAllDatabases, 1000);
+        });
+
+        // 개별 데이터베이스 테스트
+        async function testDatabase(dbName) {
+            console.log(`🔍 ${dbName} 데이터베이스 연결 테스트 시작`);
+            
+            const statusElement = document.getElementById(`${dbName}-status`);
+            statusElement.className = 'status-indicator checking';
+            
+            try {
+                const response = await fetch(`${API_BASE}/databases/${dbName}/health`);
+                
+                if (response.ok) {
+                    statusElement.className = 'status-indicator online';
+                    console.log(`✅ ${dbName} 연결 성공`);
+                    
+                    // 성공 알림 (선택사항)
+                    showNotification(`${dbName} 데이터베이스 연결 성공!`, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error(`❌ ${dbName} 연결 실패:`, error);
+                statusElement.className = 'status-indicator offline';
+                showNotification(`${dbName} 연결 실패: ${error.message}`, 'error');
+            }
+        }
+
+        // 전체 데이터베이스 상태 확인
+        async function checkAllDatabases() {
+            console.log('🔄 전체 데이터베이스 상태 확인 시작');
+            
+            const overallStatus = document.getElementById('overallStatus');
+            overallStatus.innerHTML = `
+                <h2 class="status-title">연결 상태 확인 중...</h2>
+                <p class="status-message">
+                    <span class="loading"></span>
+                    모든 데이터베이스 연결을 테스트하고 있습니다.
+                </p>
+            `;
+
+            // 모든 상태 표시기를 확인 중으로 변경
+            databases.forEach(db => {
+                document.getElementById(`${db}-status`).className = 'status-indicator checking';
+            });
+
+            let successCount = 0;
+            let totalCount = databases.length;
+
+            // 전체 상태 확인
+            try {
+                const response = await fetch(`${API_BASE}/databases/health`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // 각 데이터베이스별 상태 업데이트
+                    Object.keys(data).forEach(db => {
+                        const statusElement = document.getElementById(`${db}-status`);
+                        if (statusElement) {
+                            if (data[db] === 'connected' || data[db] === 'healthy') {
+                                statusElement.className = 'status-indicator online';
+                                successCount++;
+                            } else {
+                                statusElement.className = 'status-indicator offline';
+                            }
+                        }
+                    });
+
+                    // 전체 상태 업데이트
+                    updateOverallStatus(successCount, totalCount);
+                    
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error('❌ 전체 상태 확인 실패:', error);
+                
+                // 개별 테스트로 폴백
+                const promises = databases.map(db => testDatabase(db));
+                await Promise.all(promises);
+                
+                // 성공한 데이터베이스 수 계산
+                successCount = databases.filter(db => 
+                    document.getElementById(`${db}-status`).classList.contains('online')
+                ).length;
+                
+                updateOverallStatus(successCount, totalCount);
+            }
+        }
+
+        // 전체 상태 표시 업데이트
+        function updateOverallStatus(successCount, totalCount) {
+            const overallStatus = document.getElementById('overallStatus');
+            
+            if (successCount === totalCount) {
+                overallStatus.innerHTML = `
+                    <h2 class="status-title" style="color: #00c851;">모든 데이터베이스 연결 성공! 🎉</h2>
+                    <p class="status-message">${totalCount}개 데이터베이스 모두 정상 작동 중입니다.</p>
+                `;
+            } else if (successCount > 0) {
+                overallStatus.innerHTML = `
+                    <h2 class="status-title" style="color: #ffa500;">일부 데이터베이스 연결됨 ⚠️</h2>
+                    <p class="status-message">${totalCount}개 중 ${successCount}개 데이터베이스가 연결되었습니다.</p>
+                `;
+            } else {
+                overallStatus.innerHTML = `
+                    <h2 class="status-title" style="color: #ff4444;">데이터베이스 연결 실패 ❌</h2>
+                    <p class="status-message">모든 데이터베이스 연결에 실패했습니다. Docker 상태를 확인해주세요.</p>
+                `;
+            }
+
+            console.log(`📊 전체 상태: ${successCount}/${totalCount} 데이터베이스 연결됨`);
+        }
+
+        // 알림 표시 (선택사항)
+        function showNotification(message, type) {
+            // 간단한 콘솔 로그로 대체 (필요시 toast 알림으로 확장 가능)
+            console.log(`${type === 'success' ? '✅' : '❌'} ${message}`);
+        }
+
+        // 5초마다 자동 새로고침 (선택사항)
+        // setInterval(checkAllDatabases, 5000);
+    </script>
+</body>
+</html>

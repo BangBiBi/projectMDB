@@ -3,6 +3,7 @@ services:
   mysql:
     image: mysql:8.0
     container_name: mdb-mysql
+    restart: always  # 재부팅 후 자동 시작
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: postal_codes_db
@@ -21,6 +22,7 @@ services:
   postgresql:
     image: postgres:15
     container_name: mdb-postgresql
+    restart: always  # 재부팅 후 자동 시작
     environment:
       POSTGRES_DB: postal_codes_db
       POSTGRES_USER: mdb_user
@@ -38,6 +40,7 @@ services:
   mongodb:
     image: mongo:7.0
     container_name: mdb-mongodb
+    restart: always  # 재부팅 후 자동 시작
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: adminpassword
@@ -54,6 +57,7 @@ services:
   oracle:
     image: gvenzl/oracle-xe:21-slim
     container_name: mdb-oracle
+    restart: always  # 재부팅 후 자동 시작
     environment:
       ORACLE_PASSWORD: mdb_password
       ORACLE_DATABASE: postal_codes_db

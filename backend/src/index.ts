@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
+import path from 'path';
 import { config } from 'dotenv';
 import { DatabaseConnections } from './config/database';
 import databaseRouter from './routes/database';
@@ -15,12 +16,17 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // HTML 파일에서 인라인 스크립트 허용
+}));
 app.use(cors());
 app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Static files 서빙 (HTML 대시보드용)
+app.use(express.static(path.join(__dirname, '../../frontend/public')));
 
 // Health check endpoint
 app.get('/health', (_req, res) => {

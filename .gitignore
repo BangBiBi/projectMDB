@@ -8,6 +8,9 @@ build/
 coverage/
 *.db
 *.sqlite
+
+# 개발 지침 파일 (로컬 전용)
+DEVELOPMENT_GUIDELINES.md
 docker-volumes/
 .vscode/settings.json
 *.tmp
