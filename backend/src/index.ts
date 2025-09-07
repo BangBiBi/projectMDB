@@ -8,6 +8,7 @@ import { config } from 'dotenv';
 import { DatabaseConnections } from './config/database';
 import databaseRouter from './routes/database';
 import schemaRouter from './routes/schema';
+import postalRouter from './routes/postal';
 
 // Load environment variables
 config();
@@ -41,6 +42,7 @@ app.get('/health', (_req, res) => {
 // API routes
 app.use('/api/databases', databaseRouter);
 app.use('/api/schema', schemaRouter);
+app.use('/api/postal', postalRouter);
 
 app.use('/api', (_req, res) => {
   res.json({

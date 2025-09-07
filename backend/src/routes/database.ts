@@ -26,6 +26,72 @@ router.get('/health', async (_req, res) => {
   }
 });
 
+// 개별 데이터베이스 헬스체크
+router.get('/mysql/health', async (_req, res) => {
+  try {
+    const health = await dbManager.healthCheck();
+    if (health.mysql) {
+      res.json({ status: 'healthy', database: 'mysql', timestamp: new Date().toISOString() });
+    } else {
+      res.status(503).json({ status: 'unhealthy', database: 'mysql' });
+    }
+  } catch (error) {
+    res.status(500).json({ status: 'error', database: 'mysql', error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+router.get('/postgresql/health', async (_req, res) => {
+  try {
+    const health = await dbManager.healthCheck();
+    if (health.postgresql) {
+      res.json({ status: 'healthy', database: 'postgresql', timestamp: new Date().toISOString() });
+    } else {
+      res.status(503).json({ status: 'unhealthy', database: 'postgresql' });
+    }
+  } catch (error) {
+    res.status(500).json({ status: 'error', database: 'postgresql', error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+router.get('/mongodb/health', async (_req, res) => {
+  try {
+    const health = await dbManager.healthCheck();
+    if (health.mongodb) {
+      res.json({ status: 'healthy', database: 'mongodb', timestamp: new Date().toISOString() });
+    } else {
+      res.status(503).json({ status: 'unhealthy', database: 'mongodb' });
+    }
+  } catch (error) {
+    res.status(500).json({ status: 'error', database: 'mongodb', error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+router.get('/sqlite/health', async (_req, res) => {
+  try {
+    const health = await dbManager.healthCheck();
+    if (health.sqlite) {
+      res.json({ status: 'healthy', database: 'sqlite', timestamp: new Date().toISOString() });
+    } else {
+      res.status(503).json({ status: 'unhealthy', database: 'sqlite' });
+    }
+  } catch (error) {
+    res.status(500).json({ status: 'error', database: 'sqlite', error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+router.get('/oracle/health', async (_req, res) => {
+  try {
+    const health = await dbManager.healthCheck();
+    if (health.oracle) {
+      res.json({ status: 'healthy', database: 'oracle', timestamp: new Date().toISOString() });
+    } else {
+      res.status(503).json({ status: 'unhealthy', database: 'oracle' });
+    }
+  } catch (error) {
+    res.status(500).json({ status: 'error', database: 'oracle', error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
 // 개별 데이터베이스 연결 테스트
 router.post('/connect/:database', async (req, res) => {
   const { database } = req.params;

@@ -11,22 +11,27 @@
     "test:performance": "jest performance/",
     "test:ci": "jest --ci --coverage --watchAll=false"
   },
-  "keywords": ["test", "jest", "database", "tdd"],
+  "keywords": [
+    "test",
+    "jest",
+    "database",
+    "tdd"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "jest": "^29.7.0",
-    "supertest": "^6.3.3",
     "@types/jest": "^29.5.8",
     "@types/supertest": "^2.0.16",
-    "ts-jest": "^29.1.1",
-    "nodemon": "^3.0.2"
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1"
   },
   "dependencies": {
-    "axios": "^1.6.2",
+    "axios": "^1.11.0",
+    "mongodb": "^6.3.0",
     "mysql2": "^3.6.5",
     "pg": "^8.11.3",
-    "mongodb": "^6.3.0",
     "redis": "^4.6.10"
   }
 }

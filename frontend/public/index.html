@@ -118,6 +118,34 @@
             margin-top: 8px;
         }
 
+        .record-count {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .record-count.loading {
+            background: linear-gradient(135deg, #ccc, #999);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .record-count:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
         .test-button {
             width: 100%;
             padding: 12px;
@@ -223,6 +251,9 @@
                     OLTP 최적화, 빠른 트랜잭션 처리
                     <div class="db-port">포트: 3307</div>
                 </div>
+                <div class="record-count loading" id="mysql-count">
+                    📊 레코드 확인 중...
+                </div>
                 <button class="test-button" onclick="testDatabase('mysql')">연결 테스트</button>
             </div>
 
@@ -235,6 +266,9 @@
                     고성능 관계형 데이터베이스<br>
                     복잡한 쿼리 최적화, JSONB 지원
                     <div class="db-port">포트: 5433</div>
+                </div>
+                <div class="record-count loading" id="postgresql-count">
+                    📊 레코드 확인 중...
                 </div>
                 <button class="test-button" onclick="testDatabase('postgresql')">연결 테스트</button>
             </div>
@@ -249,6 +283,9 @@
                     스키마리스, 수평 확장성
                     <div class="db-port">포트: 27018</div>
                 </div>
+                <div class="record-count loading" id="mongodb-count">
+                    📊 레코드 확인 중...
+                </div>
                 <button class="test-button" onclick="testDatabase('mongodb')">연결 테스트</button>
             </div>
 
@@ -262,6 +299,9 @@
                     고급 최적화, CBO, 파티셔닝
                     <div class="db-port">포트: 1522</div>
                 </div>
+                <div class="record-count loading" id="oracle-count">
+                    📊 레코드 확인 중...
+                </div>
                 <button class="test-button" onclick="testDatabase('oracle')">연결 테스트</button>
             </div>
 
@@ -274,6 +314,9 @@
                     경량 파일기반 데이터베이스<br>
                     임베디드 최적화, 개발 편의성
                     <div class="db-port">파일: postal_codes.db</div>
+                </div>
+                <div class="record-count loading" id="sqlite-count">
+                    📊 레코드 확인 중...
                 </div>
                 <button class="test-button" onclick="testDatabase('sqlite')">연결 테스트</button>
             </div>
@@ -289,47 +332,47 @@
 
     <script>
         // API 기본 URL
-        const API_BASE = '/api/v1';
+        const API_BASE = '/api';
 
         // 데이터베이스 목록
         const databases = ['mysql', 'postgresql', 'mongodb', 'oracle', 'sqlite'];
 
         // 페이지 로드시 자동 실행
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎯 멀티 데이터베이스 시스템 대시보드 로드 완료');
+            // console.log('🎯 멀티 데이터베이스 시스템 대시보드 로드 완료');
             setTimeout(checkAllDatabases, 1000);
         });
 
         // 개별 데이터베이스 테스트
         async function testDatabase(dbName) {
-            console.log(`🔍 ${dbName} 데이터베이스 연결 테스트 시작`);
+            // console.log(`🔍 ${dbName} 데이터베이스 연결 테스트 시작`);
             
             const statusElement = document.getElementById(`${dbName}-status`);
+            const countElement = document.getElementById(`${dbName}-count`);
+            
             statusElement.className = 'status-indicator checking';
+            if (countElement) {
+                countElement.className = 'record-count loading';
+                countElement.textContent = '📊 레코드 확인 중...';
+            }
             
             try {
-                const response = await fetch(`${API_BASE}/databases/${dbName}/health`);
-                
-                if (response.ok) {
-                    statusElement.className = 'status-indicator online';
-                    console.log(`✅ ${dbName} 연결 성공`);
-                    
-                    // 성공 알림 (선택사항)
-                    showNotification(`${dbName} 데이터베이스 연결 성공!`, 'success');
-                } else {
-                    throw new Error(`HTTP ${response.status}`);
-                }
+                // 개별 데이터베이스 연결 테스트는 전체 상태 확인으로 대체
+                await checkAllDatabases();
                 
             } catch (error) {
-                console.error(`❌ ${dbName} 연결 실패:`, error);
+                // console.error(`❌ ${dbName} 연결 실패:`, error);
                 statusElement.className = 'status-indicator offline';
-                showNotification(`${dbName} 연결 실패: ${error.message}`, 'error');
+                if (countElement) {
+                    countElement.className = 'record-count loading';
+                    countElement.textContent = '❌ 연결 실패';
+                }
             }
         }
 
         // 전체 데이터베이스 상태 확인
         async function checkAllDatabases() {
-            console.log('🔄 전체 데이터베이스 상태 확인 시작');
+            // console.log('🔄 전체 데이터베이스 상태 확인 시작');
             
             const overallStatus = document.getElementById('overallStatus');
             overallStatus.innerHTML = `
@@ -343,6 +386,11 @@
             // 모든 상태 표시기를 확인 중으로 변경
             databases.forEach(db => {
                 document.getElementById(`${db}-status`).className = 'status-indicator checking';
+                const countElement = document.getElementById(`${db}-count`);
+                if (countElement) {
+                    countElement.className = 'record-count loading';
+                    countElement.textContent = '📊 레코드 확인 중...';
+                }
             });
 
             let successCount = 0;
@@ -350,60 +398,75 @@
 
             // 전체 상태 확인
             try {
-                const response = await fetch(`${API_BASE}/databases/health`);
+                // stats API로 레코드 수와 상태를 함께 가져오기
+                const statsResponse = await fetch('http://localhost:3001/api/postal/stats');
                 
-                if (response.ok) {
-                    const data = await response.json();
+                if (statsResponse.ok) {
+                    const statsData = await statsResponse.json();
+                    console.log('📊 Stats 데이터:', statsData);
                     
-                    // 각 데이터베이스별 상태 업데이트
-                    Object.keys(data).forEach(db => {
+                    // 각 데이터베이스별 상태 및 레코드 수 업데이트
+                    Object.keys(statsData).forEach(db => {
                         const statusElement = document.getElementById(`${db}-status`);
-                        if (statusElement) {
-                            if (data[db] === 'connected' || data[db] === 'healthy') {
+                        const countElement = document.getElementById(`${db}-count`);
+                        
+                        if (statusElement && countElement) {
+                            const dbStats = statsData[db];
+                            
+                            if (dbStats.status === 'connected' || dbStats.status === 'healthy') {
                                 statusElement.className = 'status-indicator online';
+                                countElement.className = 'record-count';
+                                countElement.textContent = `📊 ${dbStats.recordCount.toLocaleString()}개 레코드`;
                                 successCount++;
                             } else {
                                 statusElement.className = 'status-indicator offline';
+                                countElement.className = 'record-count loading';
+                                countElement.textContent = '❌ 연결 실패';
                             }
                         }
                     });
 
                     // 전체 상태 업데이트
-                    updateOverallStatus(successCount, totalCount);
+                    updateOverallStatus(successCount, totalCount, statsData);
                     
                 } else {
-                    throw new Error(`HTTP ${response.status}`);
+                    throw new Error(`HTTP ${statsResponse.status}`);
                 }
                 
             } catch (error) {
-                console.error('❌ 전체 상태 확인 실패:', error);
+                // console.error('❌ 전체 상태 확인 실패:', error);
                 
-                // 개별 테스트로 폴백
-                const promises = databases.map(db => testDatabase(db));
-                await Promise.all(promises);
-                
-                // 성공한 데이터베이스 수 계산
-                successCount = databases.filter(db => 
-                    document.getElementById(`${db}-status`).classList.contains('online')
-                ).length;
-                
-                updateOverallStatus(successCount, totalCount);
+                // 레코드 수 없이 기본 상태만 표시
+                updateOverallStatus(0, totalCount);
             }
         }
 
         // 전체 상태 표시 업데이트
-        function updateOverallStatus(successCount, totalCount) {
+        function updateOverallStatus(successCount, totalCount, statsData = null) {
             const overallStatus = document.getElementById('overallStatus');
+            
+            let totalRecords = 0;
+            if (statsData) {
+                totalRecords = Object.values(statsData)
+                    .filter(db => db.recordCount && db.recordCount > 0)
+                    .reduce((sum, db) => sum + db.recordCount, 0);
+            }
             
             if (successCount === totalCount) {
                 overallStatus.innerHTML = `
                     <h2 class="status-title" style="color: #00c851;">모든 데이터베이스 연결 성공! 🎉</h2>
-                    <p class="status-message">${totalCount}개 데이터베이스 모두 정상 작동 중입니다.</p>
+                    <p class="status-message">
+                        ${totalCount}개 데이터베이스 모두 정상 작동 중입니다.
+                        ${totalRecords > 0 ? `<br><strong>총 ${totalRecords.toLocaleString()}개 레코드</strong> 저장됨` : ''}
+                    </p>
                 `;
             } else if (successCount > 0) {
                 overallStatus.innerHTML = `
                     <h2 class="status-title" style="color: #ffa500;">일부 데이터베이스 연결됨 ⚠️</h2>
-                    <p class="status-message">${totalCount}개 중 ${successCount}개 데이터베이스가 연결되었습니다.</p>
+                    <p class="status-message">
+                        ${totalCount}개 중 ${successCount}개 데이터베이스가 연결되었습니다.
+                        ${totalRecords > 0 ? `<br><strong>총 ${totalRecords.toLocaleString()}개 레코드</strong> 저장됨` : ''}
+                    </p>
                 `;
             } else {
                 overallStatus.innerHTML = `
@@ -412,17 +475,14 @@
                 `;
             }
 
-            console.log(`📊 전체 상태: ${successCount}/${totalCount} 데이터베이스 연결됨`);
+            // console.log(`📊 전체 상태: ${successCount}/${totalCount} 데이터베이스 연결됨${totalRecords > 0 ? `, 총 ${totalRecords.toLocaleString()}개 레코드` : ''}`);
         }
 
         // 알림 표시 (선택사항)
         function showNotification(message, type) {
             // 간단한 콘솔 로그로 대체 (필요시 toast 알림으로 확장 가능)
-            console.log(`${type === 'success' ? '✅' : '❌'} ${message}`);
+            // console.log(`${type === 'success' ? '✅' : '❌'} ${message}`);
         }
-
-        // 5초마다 자동 새로고침 (선택사항)
-        // setInterval(checkAllDatabases, 5000);
     </script>
 </body>
 </html>

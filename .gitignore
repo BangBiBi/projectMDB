@@ -17,3 +17,42 @@ docker-volumes/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# 테스트 관련 파일/폴더 제외
+test/
+tests/
+__tests__/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+test-results/
+test-reports/
+
+# 대용량 테스트 데이터 파일 제외
+*.txt
+*.csv
+*.json
+*.xml
+test-data/
+sample-data/
+uploads/
+temp/
+
+# IDE 및 에디터 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS 관련 파일
+Thumbs.db
+.DS_Store
+*.log
+
+# 백업 파일
+*.bak
+*.backup
+*.old
+*.orig
