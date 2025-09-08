@@ -1,103 +1,113 @@
-# 이질적인 데이터베이스 환경을 극복하는 대용량 데이터베이스 관리 시스템 (Multi-Database Management System)
 
-## 📋 프로젝트 개요
+# 멀티 데이터베이스 관리 시스템 (Multi-Database Management System)
 
-**15주 연구 프로젝트**로 진행되는 본 시스템은 **동일한 우편번호 데이터를 5개의 서로 다른 데이터베이스에 저장하여 각 데이터베이스의 성능 특성을 비교 분석**하는 시스템입니다. 이질적인 데이터베이스 환경에서의 데이터 무결성, 성능 최적화, 감사 추적 기능을 포함한 통합 관리 시스템을 구현합니다.
+## 프로젝트 개요
+- **프로젝트명**: 이질적인 데이터베이스 환경을 극복하는 대용량 데이터베이스 관리 시스템의 설계 및 구현
+- **연구 기간**: 15주 (2025년 9월 시작)
+- **목적**: 5개 데이터베이스에서 동일한 데이터로 성능 비교 분석
+- **개발 환경**: WSL2 Ubuntu, Node.js 20.19.4, Docker
 
-## 🎯 연구 목적 및 범위
+## 시스템 구조 및 주요 기술
+```
+projectMDB/
+├── backend/                 # Node.js + TypeScript 백엔드
+│   ├── src/
+│   │   ├── index.ts        # Express 서버 메인
+│   │   ├── config/
+│   │   │   └── database.ts # DatabaseConnections 싱글톤 클래스
+│   │   └── routes/
+│   │       ├── database.ts # DB 상태 확인 API
+│   │       └── schema.ts   # 스키마 관리 API
+│   ├── .env               # 데이터베이스 연결 설정
+│   └── package.json       # 의존성 관리
+├── database/
+│   └── schemas/           # 각 DB별 스키마 파일
+├── docker-compose.yml     # 5개 DB 컨테이너 오케스트레이션
+└── frontend/              # HTML/CSS/JS 대시보드
+```
 
-### 핵심 연구 질문
-- 동일한 데이터에서 각 데이터베이스의 성능 특성은 어떻게 다른가?
-- 데이터 무결성을 보장하면서 이질적인 환경을 어떻게 관리할 것인가?
-- 각 데이터베이스별 최적 사용 사례는 무엇인가?
-
-본 프로젝트는 각 데이터베이스의 장단점을 실제 데이터와 다양한 워크로드를 통해 객관적으로 측정하고 분석합니다.
-
-## 🎯 프로젝트 목적
-
-### 성능 비교 대상
-- **삽입 속도**: 대용량 데이터 입력 성능
-- **조회 속도**: 단순/복합 쿼리 성능  
-- **업데이트 성능**: 데이터 수정 속도
-- **저장 효율성**: 디스크 사용량 및 압축률
-- **동시성**: 멀티 유저 환경 성능
-- **확장성**: 데이터 증가에 따른 성능 변화
-- **메모리 사용량**: 캐싱 및 메모리 효율성
-
-## 🛠 선정된 5개 데이터베이스
-
-### 1. **MySQL 8.0** - 전통적인 관계형 DB
-- **특징**: OLTP 최적화, B-tree 인덱스, 트랜잭션 처리
-- **기대 장점**: 단순 쿼리 빠른 처리, 안정성
-- **테스트 초점**: 트랜잭션 처리, 단순 CRUD 성능
-
-### 2. **PostgreSQL 15** - 고급 관계형 DB  
-- **특징**: 복잡한 쿼리 최적화, 다양한 인덱스 타입, JSON 지원
-- **기대 장점**: 복잡한 분석 쿼리, 지리정보 처리
-- **테스트 초점**: 복합 쿼리, 전문 검색, 지리정보 쿼리
-
-### 3. **MongoDB 7.0** - NoSQL 문서 DB
-- **특징**: 스키마리스, 수평 확장성, JSON 기반
-- **기대 장점**: 유연한 스키마, 빠른 삽입, 수평 확장
-- **테스트 초점**: 대량 삽입, 스키마 변경, 집계 파이프라인
-
-### 4. **Oracle 21c XE** - 엔터프라이즈 관계형 DB
-- **특징**: 고급 최적화 기능, CBO, 파티셔닝, 엔터프라이즈급 기능
-- **기대 장점**: 복잡한 최적화, 대용량 처리, 고급 인덱싱
-- **테스트 초점**: 고급 쿼리 최적화, 파티셔닝, 엔터프라이즈 기능
-
-### 5. **SQLite 3** - 경량 파일 기반 DB
-- **특징**: 파일 기반, 경량화, 개발 편의성, 임베디드 최적화
-- **기대 장점**: 설정 단순함, 빠른 개발, 작은 리소스 사용
-- **테스트 초점**: 경량화 성능, 개발 편의성, 단일 사용자 최적화
-
-## 📊 시스템 아키텍처
+## 데이터베이스 및 테이블
+- **MySQL 8.0**: mdb-mysql (포트: 3307)
+- **PostgreSQL 15**: mdb-postgresql (포트: 5433)
+- **MongoDB 7.0**: mdb-mongodb (포트: 27018)
+- **Oracle 21c XE**: mdb-oracle (포트: 1522)
+- **SQLite 3**: 파일 기반 (backend/data/postal_codes.db)
 
 ### 통일된 4개 테이블 구조
-**최소 구성으로 설계하여 개인 연구 프로젝트에 적합**
+1. **postal_codes** - 메인 우편번호 데이터
+2. **performance_metrics** - 성능 측정 데이터
+3. **audit_logs** - 변경사항 추적
+4. **data_integrity_checks** - 무결성 검사
 
-1. **`postal_codes`** - 메인 우편번호 데이터
-   - 기본 주소 정보 (postal_code, country_code, admin_areas)
-   - 지리 좌표 (latitude, longitude)
-   - 메타데이터 (created_at, updated_at)
+## 2일차 주요 성과 (2025년 9월 7일)
 
-2. **`performance_metrics`** - 성능 측정 결과 저장
-   - 데이터베이스 타입, 작업 유형, 실행 시간
-   - 리소스 사용량 (CPU, 메모리)
-   - 복잡도 분류 및 테스트 메타데이터
+### ✅ 대용량 데이터 처리 및 대시보드 구현
+- 74MB 대용량 파일 처리 (370,038 lines)
+- MySQL 10,000개 레코드 삽입 (374.67 records/sec)
+- 총 10,222개 레코드 저장 (5개 DB)
+- 실시간 모니터링 대시보드 (HTML/CSS/JS)
+- 프론트엔드/백엔드 분리 아키텍처
 
-3. **`audit_logs`** - 데이터 변경사항 추적 (신규)
-   - 모든 CRUD 작업 감사 추적
-   - 변경 전후 데이터 비교
-   - 사용자/세션 정보, IP 추적
+### ✅ API 및 대시보드
+- POST /api/postal/upload       # 파일 업로드 및 처리
+- GET  /api/postal/stats        # 전체 DB 통계 정보
+- GET  /api/postal/{db}/count   # 개별 DB 레코드 수
+- POST /api/postal/{db}/insert  # 개별 DB 데이터 삽입
 
-4. **`data_integrity_checks`** - 데이터 무결성 검사 (신규)
-   - 데이터베이스 간 데이터 일관성 검증
-   - 이상 탐지 및 심각도 분류
-   - 해결 상태 및 처리 이력
+### ✅ 실시간 대시보드 주요 기능
+- 각 DB별 레코드 수/상태 실시간 표시
+- 전체 통계 박스(총 레코드, 활성 DB, 평균 쿼리속도)
+- 반응형 그리드, 그라데이션 디자인, 자동 새로고침
 
-### 성능 측정 지표
+### 📈 성과 지표
+- 5개 DB 모두 연결 및 스키마 구성 완료
+- 각 DB당 4개 테이블, 총 20개 테이블 생성
+- 11개 API 모두 정상 작동
+- TypeScript, ESLint 적용
+- Git으로 체계적 관리
 
-#### 1. **처리 성능 (Throughput)**
-- 초당 삽입 레코드 수 (IPS)
-- 초당 조회 쿼리 수 (QPS)  
-- 초당 업데이트 수 (UPS)
+---
 
-#### 2. **응답 시간 (Latency)**
-- 평균 응답 시간
-- 95th Percentile 응답 시간
-- 최대 응답 시간
+## 다음 단계 로드맵
 
-#### 3. **리소스 사용량**
-- CPU 사용률
-- 메모리 사용량
-- 디스크 I/O
-- 네트워크 I/O
+### 3일차: 성능 벤치마크 및 쿼리 최적화
+- 대용량 데이터 전체 삽입 및 성능 측정
+- 쿼리 최적화, 인덱스 테스트, 데이터 시각화
 
-#### 4. **저장 효율성**
-- 실제 저장 크기
-- 압축률
-- 인덱스 크기
+### 4~5일차: 고급 기능 및 연구 보고서
+- 데이터 무결성 검사, 감사 로그, 백업/복구
+- 성능 비교 분석 보고서 작성
+
+---
+
+## 참고 정보
+
+### 주요 명령어
+```bash
+# Docker 컨테이너 상태 확인
+docker ps
+
+# 백엔드 서버 실행
+cd backend && npm run dev
+
+# DB 접속 예시
+docker exec -it mdb-mysql mysql -u mdb_user -pmdb_password postal_codes_db
+docker exec -it mdb-postgresql psql -U mdb_user -d postal_codes_db
+docker exec -it mdb-mongodb mongosh "mongodb://admin:adminpassword@localhost:27017/postal_codes_db?authSource=admin"
+docker exec -it mdb-oracle sqlplus system/mdb_password@XE
+sqlite3 backend/data/postal_codes.db
+```
+
+### API 테스트 URL
+- 전체 DB 상태: http://localhost:3001/api/postal/stats
+- MySQL 상태: http://localhost:3001/api/databases/mysql/health
+- PostgreSQL 상태: http://localhost:3001/api/databases/postgresql/health
+- MongoDB 상태: http://localhost:3001/api/databases/mongodb/health
+- Oracle 상태: http://localhost:3001/api/databases/oracle/health
+- SQLite 상태: http://localhost:3001/api/databases/sqlite/health
+
+---
+**최종 업데이트**: 2025년 9월 8일
 
 #### 5. **동시성**
 - 동시 연결 수
